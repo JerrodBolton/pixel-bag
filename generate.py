@@ -6,11 +6,13 @@ Usage:
 """
 
 import argparse
+import random
 import time
 from pathlib import Path
 
 import torch
 from diffusers import AutoPipelineForText2Image
+from PIL.PngImagePlugin import PngInfo
 
 # Any text-to-image model on the Hub works here. SDXL-Turbo is fast (1-4 steps)
 # and fits comfortably in 16 GB. Weights download once to ~/.cache/huggingface.
@@ -47,10 +49,10 @@ def main() -> None:
         variant="fp16",             # download the fp16 weight files only
     ).to(device)
 
-    # A seeded generator makes results repeatable.
-    generator = None
-    if args.seed is not None:
-        generator = torch.Generator("cpu").manual_seed(args.seed)
+    # A seeded generator makes results repeatable. If no seed is given, pick one
+    # so it can be saved with the image and the result reproduced later.
+    seed = args.seed if args.seed is not None else random.randrange(2**32)
+    generator = torch.Generator("cpu").manual_seed(seed)
 
     start = time.time()
     image = pipe(
@@ -63,7 +65,14 @@ def main() -> None:
 
     out = args.out or Path("outputs") / f"{int(time.time())}.png"
     out.parent.mkdir(parents=True, exist_ok=True)
-    image.save(out)
+
+    # Store the settings as PNG text chunks so each image records how it was made.
+    metadata = PngInfo()
+    metadata.add_text("prompt", args.prompt)
+    metadata.add_text("model", MODEL_ID)
+    metadata.add_text("steps", str(args.steps))
+    metadata.add_text("seed", str(seed))
+    image.save(out, pnginfo=metadata)
     print(f"Saved {out}")
 
 

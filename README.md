@@ -18,12 +18,16 @@ It's built for Apple Silicon Macs and uses the GPU through PyTorch's MPS backend
 uv run generate.py "a cozy cabin in a snowy forest, golden hour"
 ```
 
-Images are saved to `outputs/<timestamp>.png` unless you pass `--out`.
+Images are saved to `outputs/<timestamp>.png` unless you pass `--out`. Each PNG stores its prompt, model, steps and seed in its metadata. To read them back:
+
+```sh
+uv run python -c "from PIL import Image; print(Image.open('outputs/<file>.png').text)"
+```
 
 | Option | Default | Description |
 | --- | --- | --- |
 | `--steps` | `2` | Denoising steps. 1–4 is plenty for Turbo. |
-| `--seed` | random | Set a seed to get the same image again. |
+| `--seed` | random | Set a seed to get the same image again. A random seed is still saved in the metadata. |
 | `--out` | `outputs/<timestamp>.png` | Where to save the image. |
 
 ```sh
