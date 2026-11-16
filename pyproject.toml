@@ -1,7 +1,7 @@
 [project]
 name = "hf-image-gen"
 version = "0.1.0"
-description = "Add your description here"
+description = "Local text-to-image generation with diffusers and SDXL-Turbo"
 readme = "README.md"
 authors = [
     { name = "Jerrod Bolton", email = "85716225+JerrodBolton@users.noreply.github.com" }
